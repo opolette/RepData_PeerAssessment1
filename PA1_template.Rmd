@@ -1,25 +1,74 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
+title: "PA1_template"
+author: "OP"
+date: "02/04/2021"
 output: 
   html_document:
     keep_md: true
 ---
-
-
 ## Loading and preprocessing the data
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+myDF <- read.csv("activity.csv")
+myDF$date <- as.Date(as.character(myDF$date))
 
-
+```
 
 ## What is mean total number of steps taken per day?
+```{r TotalDailySteps, echo=FALSE}
+## Make sure to execute setup section before this one 
 
+# Spread of Total number of steps per day
+stepsPerDay <- myDF %>% group_by(date) %>% summarise(totalSteps = sum(steps))
+hist(stepsPerDay$totalSteps, xlab = "Number of Steps per Day", main = "Frequency of Number of steps per day")
+# Mean and Median of Steps per day
+print(paste("Mean: ", mean(stepsPerDay$totalSteps, na.rm = TRUE), " / Median: ", median(stepsPerDay$totalSteps, na.rm = TRUE)))
 
+```
 
 ## What is the average daily activity pattern?
+```{r avgDay, echo=FALSE}
+## Make sure to execute setup section before this one
 
+# Average number of steps per 5 minutes intervals
+avgSteps <- myDF %>% group_by(interval) %>% summarise(average = mean(steps, na.rm = TRUE))  
+plot(x = avgSteps$interval, y = avgSteps$average, type="l", xlab="5 mins Interval", ylab="Avg # of Steps", main = "Average daily activity pattern")
+```
 
+** There is clearly a peak of activity around mid day**
 
 ## Imputing missing values
+```{r missVal, echo=FALSE}
+## Make sure to execute setup section before this one
 
+# Number of NAs in Dataframe
+paste("Number of NAs:",myDF %>% filter(is.na(steps)) %>% count())
+# Create a new Dataframe that contains the mean of steps per interval
+# and use this value to replace corresponding NAs in column step in a new DataFrame
+avgSteps <- myDF %>% group_by(interval) %>% summarise(average = mean(steps, na.rm = TRUE)) 
+myAvgDF <- full_join(myDF, avgSteps, by = 'interval') %>%  mutate( steps = coalesce(steps, average))
+stepsPerDay <- myAvgDF %>% group_by(date) %>% summarise(totalSteps = sum(steps))
+hist(stepsPerDay$totalSteps, xlab = "Number of Steps per Day", main = "Frequency of Number of steps per day")
+# Mean and Median of Steps per day
+print(paste("Mean: ", mean(stepsPerDay$totalSteps, na.rm = TRUE), " / Median: ", median(stepsPerDay$totalSteps, na.rm = TRUE)))
 
+```
+**We see that replacing NA in the the "steps" column by the mean of steps per 5mn interval does not impact the overall mean, as expected. However, the median, which was very close to the mean in the initial Dataframe, now is equal to the mean...**
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r weekdaysPattern, echo=FALSE}
+## Make sure to execute setup section before this one
+## Make sur you execute missVal section before this one
+
+# Create a colimn with indication weekday/weekend
+# Create a new Dataframe with average of average number of steps per 5 minutes intervals per weekdays or weekends
+# Isn't that a wonderfully meaninful exercise?
+
+myAvgDF <- myAvgDF %>% mutate(dayOfWeek=factor(ifelse(weekdays(date) == "dimanche" | weekdays(date) == "samedi", "weekend", "weekday")))
+avgStepsPerDayCateg <- myAvgDF %>% group_by(dayOfWeek, interval) %>% summarise(averageSteps = mean(steps))
+ggplot(data = avgStepsPerDayCateg, aes(x=interval, color=dayOfWeek)) + geom_line(aes(y = averageSteps)) + xlab("5 mn Interval") + ylab("Average Steps") + labs(title = "Avg Steps per Weekdays/Weekends per 5 mn Interval", color = "Days") + facet_wrap(. ~ dayOfWeek,  dir = "v")
+```
+
+**There are differences: the average number of steps during weekends is slightly lower at mid-day and higher of about 100 steps in the afternoon, per interval of 5 minutes.**
