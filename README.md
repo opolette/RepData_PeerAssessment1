@@ -1,6 +1,4 @@
-## Beware: the figures are located in the "PA1_template_files/figure-html" directory  
-and not in the "figure/" directory as mentioned in the instructions  
-This is the default behaviour of the current version of knit
+## Beware: the figures are located in the "PA1_template_files/figure-html" directory &nbsp;and not in the "figure/" directory as mentioned in the instructions &nbsp;This is the default behaviour of the current version of knit
 
 ## Introduction
 
