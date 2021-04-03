@@ -1,3 +1,7 @@
+## Beware: the figures are located in the "PA1_template_files/figure-html" directory
+## and not in the "figure/" directory as mentioned in the instructions
+## This is the default behaviour of the current version of knit
+
 ## Introduction
 
 It is now possible to collect a large amount of data about personal
